@@ -93,11 +93,26 @@ enum SceNotificationRequestType
 	AddressingSystemNotificationWithUserName = 16,
 	AddressingSystemNotificationWithUserId = 17,
 
-	Debug = 100,
-	TrcCheckNotificationRequest = 101,
-	NpDebugNotificationRequest = 102,
-	WebDebug = 102,
+	DebugMessage = 100,
+	TrcCheckMessage = 101,
+	NpDebugMessage = 102,
+	WebDebugMessage = 102,
 	UNK_103 = 103,
+};
+
+enum SystemNotificationPriority
+{
+	Default = 0,
+	High = 1,
+	Special = -1
+};
+
+enum SystemNotificationAttribute
+{
+	ShowVideoPlayback = 1,
+	ShowVR = 2,
+	ShowKratos = 4,
+	All = 7,
 };
 
 enum NotificationAPI
@@ -115,8 +130,8 @@ struct SceNotificationRequest
 	uint32_t MsgId;            				// 0x0C
 	uint32_t TargetId;						// 0x10
 	uint32_t UserId;						// 0x14
-	uint32_t unk_18;						// 0x18
-	uint32_t unk_1C;						// 0x1C
+	uint32_t DeviceId;						// 0x18
+	uint32_t AddressingUserId;				// 0x1C
 	uint32_t AppId;            				// 0x20
 	uint32_t ErrorNumber;					// 0x24
 	uint32_t Attribute;						// 0x28
@@ -131,9 +146,9 @@ struct SceNotificationRequest
 
 		struct
 		{
-			char unk1[180];					// 0x2D
-			char unk2[180];					// 0xE1
-			char unk3[180];					// 0x195
+			char arg1[180];					// 0x2D
+			char arg2[180];					// 0xE1
+			char arg3[180];					// 0x195
 
 		};
 
@@ -146,7 +161,7 @@ struct SceNotificationRequest
 #pragma pack(pop)
 static_assert(sizeof(SceNotificationRequest) == 0xC30, "Size of SceNotificationRequest is not 0xC30");
 
-int(*sceKernelSendNotificationRequest)(int api, char* buffer, size_t size, bool unk);
+int(*sceKernelSendNotificationRequest)(int api, char* buffer, size_t size, bool blocking);
 int(*notification_write_from_kernel)(int api, char* buffer, size_t size, int ioflag);
 ```
 
