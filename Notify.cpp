@@ -1,4 +1,4 @@
-enum NotifyType
+enum SceNotificationRequestType
 {
 	NotificationRequest = 0,
 	SystemNotification = 1,
@@ -20,57 +20,111 @@ enum NotifyType
 	AddressingSystemNotificationWithUserName = 16,
 	AddressingSystemNotificationWithUserId = 17,
 
-	UNK_1 = 100,
+	Debug = 100,
 	TrcCheckNotificationRequest = 101,
 	NpDebugNotificationRequest = 102,
-	UNK_2 = 102,
+	WebDebug = 102,
+	UNK_103 = 103,
 };
 
-struct NotifyBuffer
-{ //Naming may be incorrect.
-	NotifyType Type;		//0x00 
-	int ReqId;				//0x04
-	int Priority;			//0x08
-	int MsgId;				//0x0C
-	int TargetId;			//0x10
-	int UserId;				//0x14
-	int unk1;				//0x18
-	int unk2;				//0x1C
-	int AppId;				//0x20
-	int ErrorNum;			//0x24
-	int unk3;				//0x28
-	char UseIconImageUri; 	//0x2C
-	char Message[1024]; 	//0x2D
-	char Uri[1024]; 		//0x42D
-	char unkstr[1024];		//0x82D
-}; //Size = 0xC30
-
-int64_t (*sceKernelSendNotificationRequest)(int64_t unk1, char* Buffer, size_t size, int64_t unk2);
-
-//Calling from userland
-void Notify(char* IconURI, char* MessageFMT, ...)
+enum NotificationAPI
 {
-  NotifyBuffer Buffer;
-  
-  //Create full string from va list.
+	ToastPopup = 0,
+	NotifyDatabase = 1,
+};
+
+#pragma pack(push, 1)
+struct SceNotificationRequest
+{
+	enum SceNotificationRequestType Type;   // 0x00
+	uint32_t ReqId;            				// 0x04
+	uint32_t Priority;						// 0x08
+	uint32_t MsgId;            				// 0x0C
+	uint32_t TargetId;						// 0x10
+	uint32_t UserId;						// 0x14
+	uint32_t unk_18;						// 0x18
+	uint32_t unk_1C;						// 0x1C
+	uint32_t AppId;            				// 0x20
+	uint32_t ErrorNumber;					// 0x24
+	uint32_t Attribute;						// 0x28
+	uint8_t  HasIcon;						// 0x2C
+	union
+	{
+		struct
+		{
+			char Message[0x400];			// 0x2D
+			char IconImageUri[0x800];		// 0x42D
+		};
+
+		struct
+		{
+			char unk1[180];					// 0x2D
+			char unk2[180];					// 0xE1
+			char unk3[180];					// 0x195
+
+		};
+
+		struct	// Ensure proper size.
+		{
+			char buffer[0xC03];				// 0x2D
+		};
+	};
+};
+#pragma pack(pop)
+
+static_assert(sizeof(SceNotificationRequest) == 0xC30, "Size of SceNotificationRequest is not 0xC30");
+
+int(*sceKernelSendNotificationRequest)(int api, char* buffer, size_t size, bool unk);
+
+// Calling from userland:
+void Notify(const char* icon, const char* fmt, ...)
+{
+	SceNotificationRequest buffer;
+
 	va_list args;
-	va_start(args, MessageFMT);
-	vsprintf(Buffer.Message, MessageFMT, args);
+	va_start(args, fmt);
+	vsprintf(buffer.message, fmt, args);
 	va_end(args);
-  
-  //Populate the notify buffer.
-  Buffer.Type = NotifyType::NotificationRequest; //this one is just a standard one and will print what ever is stored at the buffer.Message.
-	Buffer.unk3 = 0; 
-	Buffer.UseIconImageUri = 1; //Bool to use a custom uri.
-	Buffer.TargetId = -1; //Not sure if name is correct but is always set to -1.
-	strcpy(Buffer.Uri, IconURI); //Copy the uri to the buffer.
-  
-  //From user land we can call int64_t sceKernelSendNotificationRequest(int64_t unk1, char* Buffer, size_t size, int64_t unk2) which is a libkernel import.
-  sceKernelSendNotificationRequest(0, (char*)&Buffer, 3120, 0);
-  
-  //What sceKernelSendNotificationRequest is doing is opening the device "/dev/notification0" or "/dev/notification1"
-  // and writing the NotifyBuffer we created to it. Somewhere in ShellUI it is read and parsed into a json which is where
-  // I found some clues on how to build the buffer.
+
+	buffer.type = SceNotificationRequestType::NotificationRequest;
+	buffer.Attribute = 0;
+	buffer.useIconImageUri = 1;
+	buffer.targetId = -1;
+	strcpy(buffer.iconUri, icon);
+
+	sceKernelSendNotificationRequest(NotificationAPI::Native, &buffer, sizeof(SceNotificationRequest), false);
+
+	// What is sceKernelSendNotificationRequest doing?
+	// 
+	//		1. Opens the device "/dev/notification[0-4]" depending on the NotificationAPI passed in.
+	//		2. Writes the data from the buffer to that device where the kernel forwards it to the listening side which for notification0/notification1 is SceShellUI.
+	// 
+	// NOTES: From what I can tell the json version is used to write to the notification data base.
 }
 
-//If anyone is interested this can also be called from kernel I can add that later.
+int(*notification_write_from_kernel)(int api, char* buffer, size_t size, int ioflag);
+
+// Calling from the kernel:
+void kNotify(const char* icon, const char* fmt, ...)
+{
+	SceNotificationRequest buffer;
+
+	va_list args;
+	va_start(args, fmt);
+	vsprintf(buffer.message, fmt, args);
+	va_end(args);
+
+	buffer.type = SceNotificationRequestType::NotificationRequest;
+	buffer.Attribute = 0;
+	buffer.useIconImageUri = 1;
+	buffer.targetId = -1;
+	strcpy(buffer.iconUri, icon);
+
+	notification_write_from_kernel(NotificationAPI::Native, &buffer, sizeof(SceNotificationRequest), FNONBLOCK);
+
+	// What is notification_write_from_kernel doing?
+	// 
+	//		- Has the same operation as above but writes to the buffer directly in the kernel.
+	//
+	// NOTES: You can find this easily because Sony will use this to pop notifications like "VideoOut:\nOnly %ld\nflips/second" on 9.00.
+}
