@@ -26,7 +26,7 @@ void Notify(const char* icon, const char* fmt, ...)
 	vsprintf(buffer.message, fmt, args);
 	va_end(args);
 
-	buffer.type = SceNotificationRequestType::NotificationRequest;
+	buffer.type = SceNotificationRequestType::Message;
 	buffer.Attribute = 0;
 	buffer.useIconImageUri = 1;
 	buffer.targetId = -1;
@@ -54,7 +54,7 @@ void Notify(const char* icon, const char* fmt, ...)
 	vsprintf(buffer.message, fmt, args);
 	va_end(args);
 
-	buffer.type = SceNotificationRequestType::NotificationRequest;
+	buffer.type = SceNotificationRequestType::Message;
 	buffer.Attribute = 0;
 	buffer.useIconImageUri = 1;
 	buffer.targetId = -1;
@@ -73,25 +73,24 @@ void Notify(const char* icon, const char* fmt, ...)
 ``` C++
 enum SceNotificationRequestType
 {
-	NotificationRequest = 0,
-	SystemNotification = 1,
-	SystemNotificationWithUserId = 2,
-	SystemNotificationWithDeviceId = 3,
-	SystemNotificationWithDeviceIdRelatedToUser = 4,
-	SystemNotificationWithText = 5,
-	SystemNotificationWithTextRelatedToUser = 6,
-	SystemNotificationWithErrorCode = 7,
-	SystemNotificationWithAppId = 8,
-	SystemNotificationWithAppName = 9,
-	SystemNotificationWithAppInfo = 9,
-	SystemNotificationWithAppNameRelatedToUser = 10,
-	SystemNotificationWithParams = 11,
-	SendSystemNotificationWithUserName = 12,
-	SystemNotificationWithUserNameInfo = 13,
-	SendAddressingSystemNotification = 14,
-	AddressingSystemNotificationWithDeviceId = 15,
-	AddressingSystemNotificationWithUserName = 16,
-	AddressingSystemNotificationWithUserId = 17,
+	Message = 0,
+	MessageMsgId = 1,
+	MessageUserId = 2,
+	MessageDeviceId = 3,
+	MessageDeviceIdRelatedToUser = 4,
+	MessageText = 5,
+	MessageTextRelatedToUser = 6,
+	MessageErrorCode = 7,
+	MessageAppId = 8,
+	MessageAppInfo = 9,
+	MessageTitleRelatedToUser = 10,
+	MessageParams = 11,
+	MessageUserName = 12,
+	MessageUserNameInfo = 13,
+	MessageAddressing = 14,
+	MessageAddressingDeviceId = 15,
+	MessageAddressingUserName = 16,
+	MessageAddressingUserId, = 17,
 
 	DebugMessage = 100,
 	TrcCheckMessage = 101,
