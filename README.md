@@ -37,7 +37,7 @@ void Notify(const char* icon, const char* fmt, ...)
 ```
 
 ### What is sceKernelSendNotificationRequest doing?
-1. Opens the device "/dev/notification[0-4]" depending on the NotificationAPI passed in.
+1. Opens the device "/dev/notification[0-5]" depending on the NotificationAPI passed in.
 2. Writes the data from the buffer to that device where the kernel forwards it to the listening side which for notification0/notification1 is SceShellUI.
 
 **NOTES:** From what I can tell the json version is used to write to the notification data base.
@@ -153,17 +153,17 @@ int(*notification_write_from_kernel)(int api, char* buffer, size_t size, int iof
 ## Some Icon URIs I have dumped
 There is probably more than these but these I have tested and confirmed they do work.
 ```
-cxml://psnotification/tex_icon_system                 //Playstation buttons
-cxml://psnotification/tex_icon_ban                    //Circle with a slash
-cxml://psnotification/tex_default_icon_notification   //i in a chat bubble
+cxml://psnotification/tex_icon_system                 // Playstation buttons
+cxml://psnotification/tex_icon_ban                    // Circle with a slash
+cxml://psnotification/tex_default_icon_notification   // i in a chat bubble
 cxml://psnotification/tex_default_icon_message
 cxml://psnotification/tex_default_icon_friend
 cxml://psnotification/tex_default_icon_trophy
 cxml://psnotification/tex_default_icon_download
 cxml://psnotification/tex_default_icon_upload_16_9
-cxml://psnotification/tex_default_icon_cloud_client   //ps now logo
+cxml://psnotification/tex_default_icon_cloud_client   // ps now logo
 cxml://psnotification/tex_default_icon_activity
-cxml://psnotification/tex_default_icon_smaps          //bullhorn
+cxml://psnotification/tex_default_icon_smaps          // bullhorn
 cxml://psnotification/tex_default_icon_shareplay
 cxml://psnotification/tex_default_icon_tips
 cxml://psnotification/tex_default_icon_events
@@ -204,14 +204,14 @@ cxml://psnotification/tex_device_keyboard
 cxml://psnotification/tex_device_mic
 cxml://psnotification/tex_device_morpheus
 cxml://psnotification/tex_device_mouse
-cxml://psnotification/tex_device_move               //ps move controller
+cxml://psnotification/tex_device_move               // ps move controller
 cxml://psnotification/tex_device_remote
 cxml://psnotification/tex_device_omit
-cxml://psnotification/tex_icon_connect              //Weird blury thing
-cxml://psnotification/tex_icon_event_toast          //Calendar
+cxml://psnotification/tex_icon_connect              // Weird blury thing
+cxml://psnotification/tex_icon_event_toast          // Calendar
 cxml://psnotification/tex_morpheus_trophy_bronze
 cxml://psnotification/tex_morpheus_trophy_silver
 cxml://psnotification/tex_morpheus_trophy_gold
 cxml://psnotification/tex_morpheus_trophy_platinum
-cxml://psnotification/tex_icon_champions_league     //The OG foot ball lol
+cxml://psnotification/tex_icon_champions_league     // The OG foot ball lol
 ```
