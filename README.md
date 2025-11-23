@@ -15,6 +15,13 @@ You dont have to use one of the default ps4 icons though using a web url will wo
 Notify("http://www.somewhere.com/SomeImage.png", "Hello World"); 
 ```
 
+You can also use an image from the HDD but it must be a location visible to ShellUI.
+
+``` C++
+Notify("file://user/data/SomeImage.png", "Hello World");
+Notify("/user/data/SomeImage.png", "Hello World");
+```
+
 ## Calling from Userland
 ``` C++
 void Notify(const char* icon, const char* fmt, ...)
