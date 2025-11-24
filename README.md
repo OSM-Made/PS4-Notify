@@ -39,7 +39,7 @@ void Notify(const char* icon, const char* fmt, ...)
 	buffer.targetId = -1;
 	strcpy(buffer.iconUri, icon);
 
-	sceKernelSendNotificationRequest(NotificationAPI::Native, &buffer, sizeof(SceNotificationRequest), false);
+	sceKernelSendNotificationRequest(NotificationAPI::ToastPopup, &buffer, sizeof(SceNotificationRequest), false);
 }
 ```
 
@@ -67,7 +67,7 @@ void Notify(const char* icon, const char* fmt, ...)
 	buffer.targetId = -1;
 	strcpy(buffer.iconUri, icon);
 
-	notification_write_from_kernel(NotificationAPI::Native, &buffer, sizeof(SceNotificationRequest), FNONBLOCK);
+	notification_write_from_kernel(NotificationAPI::ToastPopup, &buffer, sizeof(SceNotificationRequest), FNONBLOCK);
 }
 ```
 
